@@ -1,0 +1,27 @@
+{
+  "name": "8-chords",
+  "version": "1.0.0",
+  "description": "Max for Live chord progression generator.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanZaion/8-chords.git"
+  },
+  "keywords": [
+    "chords"
+  ],
+  "author": "Jan Zaion",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JanZaion/8-chords/issues"
+  },
+  "homepage": "https://github.com/JanZaion/8-chords#readme",
+  "dependencies": {
+    "@tonaljs/tonal": "^4.6.5",
+    "convenient-methods-of-randomness": "^1.0.2",
+    "scribbletune": "^4.1.1"
+  }
+}

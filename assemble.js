@@ -1,6 +1,6 @@
 const maxApi = require('max-api');
 const { makeChords, translateChordMap } = require('./makeChords');
-const { scribbleClipToMidiSteps, liveFormatTranspose } = require('./liveFormatFNs');
+const { scribbleClipToMidiSteps } = require('./scribbleClipToMidiSteps');
 
 const make = async () => {
   const main = await maxApi.getDict('main');
@@ -12,11 +12,7 @@ const make = async () => {
   const clip = chordsMade[0];
   const names = chordsMade[1];
 
-  const preTransposedMidiSteps = scribbleClipToMidiSteps(clip);
-
-  const liveFormat = liveFormatTranspose(preTransposedMidiSteps.liveFormat, 12);
-
-  const totalDuration = preTransposedMidiSteps.totalDuration;
+  const { liveFormat, totalDuration } = scribbleClipToMidiSteps(clip);
 
   await Promise.all([
     maxApi.setDict('chordNames', {

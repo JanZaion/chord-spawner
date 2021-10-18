@@ -1540,7 +1540,6 @@ function makeChords(params) {
       chordsFinal[index] = chordsFinal[index] + advChords;
     });
   }
-
   chordsFinal = chordsFinal.join(' ');
 
   var scribbleClip = scribble.clip({
@@ -1741,61 +1740,6 @@ function translateChordMap(chordMapMatrixified) {
   }); //We cannot construct chord progression if 0 chords are to follow any chord, but user might leave a row totally empty, hence if empty row, we push the 1st chord
 
   return chordMap;
-}
-
-/*
-Generates a rhythm suitable for 4 chord pattern out of 4 "x" and 4 or 12 "_".
--wild accepts boolean. If true, x can be anywhere, if false, x is more evenly distributed
--hoLong accepts 1 or 2. If 1 then the rhythm pattern is 8 char long. If 2 then 16.
-*/
-function generateRhythm(wild, howLong) {
-  switch (howLong) {
-    case 'short':
-      numChar = 8;
-      break;
-
-    case 'long':
-      numChar = 16;
-      break;
-  }
-
-  var rhythm = [];
-  for (var i = 0; i < numChar; i++) rhythm.push('_');
-
-  switch (wild) {
-    case 'wild':
-      var xArray = diceMultiRollSortedASC(numChar, 0, 4);
-
-      break;
-
-    case 'mild':
-      var x1 = diceRange(numChar / 4, 0);
-      var x2 = diceRange(numChar / 4 + numChar / 4, numChar / 4);
-      var x3 = diceRange(numChar / 4 + (numChar / 4) * 2, numChar / 4 + numChar / 4);
-      var x4 = diceRange(numChar / 4 + (numChar / 4) * 3, numChar / 4 + (numChar / 4) * 2);
-      var xArray = [x1, x2, x3, x4];
-
-      break;
-  }
-
-  var j = 0;
-  for (var i = 0; i < numChar; i++) {
-    if (i === xArray[j]) {
-      rhythm[i] = 'x';
-      j++;
-    }
-  }
-
-  for (var i = 0; i < numChar; i) {
-    if (rhythm[i] === '_') {
-      rhythm.shift();
-      rhythm.push('_');
-    } else {
-      break;
-    }
-  }
-
-  return rhythm.join('');
 }
 
 function halve(scribbleClip, numOfNotes, firstNote) {
@@ -2043,9 +1987,6 @@ function openChords(scribbleClip, open) {
   return scribbleClip;
 }
 
-/*
-Ok, wtf is this? Since makeChords accepts callback function to do the voicing and these functions are picked from live.menu as strings, there needs to be option for no voicing, hence this function.
-*/
 global.none = function none(scribbleClip) {
   return scribbleClip;
 };
@@ -2425,46 +2366,8 @@ global.Ascend_Highest = function Ascend_Highest(scribbleClip) {
 };
 
 module.exports = {
-  augmentChordsWithBassNote2,
-  openChords,
-  redeclareScribbleClip,
-  removeNotesFromChord,
-  chopOrSplit,
-  generateRhythm,
-  chopNum,
-  translateChordMap,
-  humanToBool,
-  augmentChordsWithBassNote,
-  augmentChord,
-  transposeNotesInChord,
   makeChords,
-  absoluteToRelativeChord,
-  halve,
-  legato,
-  displacement,
-  changeLength,
-  trimClip,
-  transposeNotes,
-  dice,
-  diceBoolean,
-  diceRange,
-  diceMultiRollSortedASC,
-  diceMultiRollSortedDSC,
-  diceMultiRollUnsorted,
-  replaceAt,
-  generateRP,
-  commonRPs8n,
-  generateMelodyClip,
-  chop,
-  notesToArray,
-  nullCleanup,
-  contingency,
-  fixScale,
-  nullNotesDirection,
-  transposeNotesDirection,
-  retrograde,
-  inversion,
-  ommitNotes,
+  translateChordMap,
 };
 
 /*
@@ -2491,30 +2394,30 @@ console.log(makeChords("C", "major", false, "A#dim", true, "x-xx", "4n", 0, chor
 //for (i = 0; i < 30; i++)console.log(makeChords("C", "major", true, "R R R R R", false, "xx", "4n", 0, chordMap, "sin", "none", 0, "Venus_Chords", 1, 0, "split", 0)[1])
 */
 
-makeChords({
-  chordMap: [
-    0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 1, 5, 0, 1, 6, 0, 1, 0, 1, 0, 1, 1, 1, 2, 1, 1, 3, 1, 1, 4, 1, 1, 5, 1, 1,
-    6, 1, 1, 0, 2, 0, 1, 2, 0, 2, 2, 1, 3, 2, 1, 4, 2, 1, 5, 2, 0, 6, 2, 0, 0, 3, 1, 1, 3, 1, 2, 3, 0, 3, 3, 1, 4, 3, 0,
-    5, 3, 1, 6, 3, 0, 0, 4, 1, 1, 4, 0, 2, 4, 1, 3, 4, 0, 4, 4, 1, 5, 4, 1, 6, 4, 0, 0, 5, 1, 1, 5, 0, 2, 5, 0, 3, 5, 1,
-    4, 5, 0, 5, 5, 1, 6, 5, 0, 0, 6, 1, 1, 6, 1, 2, 6, 0, 3, 6, 1, 4, 6, 1, 5, 6, 0, 6, 6, 0, 0, 7, 1, 1, 7, 0, 2, 7, 0,
-    3, 7, 1, 4, 7, 0, 5, 7, 1, 6, 7, 0,
-  ],
-  bassNote: 0,
-  open: 0,
-  randomAssist: 1,
-  repeatChords: 1,
-  seventh: 1,
-  splitChop: 0,
-  RN: 'F',
-  mode: 'Minor',
-  octave: 3,
-  sizzle: 'sin',
-  advChords: 'none',
-  voicing: 'none',
-  subdiv: '4n',
-  splitter: 0,
-  chordPatterns: ['R', 'R', 'R', 'R'],
-  patterns: 'xxxx',
-  pattern: 'xxxx',
-  chords: ['R', 'R', 'R', 'R'],
-});
+// const asd = makeChords({
+//   chordMap: [
+//     0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 1, 5, 0, 1, 6, 0, 1, 0, 1, 0, 1, 1, 1, 2, 1, 1, 3, 1, 1, 4, 1, 1, 5, 1, 1,
+//     6, 1, 1, 0, 2, 0, 1, 2, 0, 2, 2, 1, 3, 2, 1, 4, 2, 1, 5, 2, 0, 6, 2, 0, 0, 3, 1, 1, 3, 1, 2, 3, 0, 3, 3, 1, 4, 3, 0,
+//     5, 3, 1, 6, 3, 0, 0, 4, 1, 1, 4, 0, 2, 4, 1, 3, 4, 0, 4, 4, 1, 5, 4, 1, 6, 4, 0, 0, 5, 1, 1, 5, 0, 2, 5, 0, 3, 5, 1,
+//     4, 5, 0, 5, 5, 1, 6, 5, 0, 0, 6, 1, 1, 6, 1, 2, 6, 0, 3, 6, 1, 4, 6, 1, 5, 6, 0, 6, 6, 0, 0, 7, 1, 1, 7, 0, 2, 7, 0,
+//     3, 7, 1, 4, 7, 0, 5, 7, 1, 6, 7, 0,
+//   ],
+//   bassNote: 0,
+//   open: 0,
+//   randomAssist: 1,
+//   repeatChords: 1,
+//   seventh: 0,
+//   splitChop: 0,
+//   RN: 'Fb',
+//   mode: 'Major',
+//   octave: 0,
+//   sizzle: 'sin',
+//   advChords: 'none',
+//   voicing: 'none',
+//   subdiv: '4n',
+//   splitter: 0,
+//   chordPatterns: ['R', 'R', 'R', 'R'],
+//   patterns: 'xxxx',
+//   pattern: 'xxxx',
+//   chords: ['R', 'R', 'R', 'R'],
+// });

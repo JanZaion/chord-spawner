@@ -16,7 +16,7 @@ const make = async () => {
 
   await Promise.all([
     maxApi.setDict('chordNames', {
-      Chords: names,
+      chords: names,
     }),
     maxApi.setDict('steps', {
       notes: liveFormat,

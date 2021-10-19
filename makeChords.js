@@ -194,263 +194,6 @@ function romans(RN, chords) {
 }
 
 /*
-Generates a chord progression. Returns a scribbleclip and the chord progression as a string, so it can be manipulated again.
--RN accepts a string that denotes the root note of a key, ie 'C' of C major
--mode accepts either of the 4 possible strings: "major", "minor", "ionian", "dorian", "phrygian", "lydian", "mixolydian", "aeolian", "locrian"
--seventh denotes whether we will use seventh chords and accepts boolean.
--chords accetps an array or string that denotes chords to use and where to pick random chords, ie 'CM7 1 2 R'. 'R' denotes that this time we pick a random chord. Numbers 1-7 are a standin for the Roman numeral chord notation. Chord names are accepted in both tonal.js Scribbletune ('maj' vs 'M').
--repeatChords dictates whether randomly picked chords have a chance to be the same as chords already present in the progression.
--pattern is the Scribbletune pattern
--subdiv is the Sccribbletune subdiv
--voicing accepts string and it looks for globally scoped functions with a name same as the string to execute on the scribbleclip.
--octave accepts 0-5 and it denotes in which octave a root note of each chord should be
--bassNote accepts 1 or 0 and it denotes whether there should be a root note at octave 0 added to each chord
-
-description to add: randomAssist, chordMap
-
-Notes:
--For now we accept either names of chords or arabic numbers. In the future write function that will preceed this function with translation of roman to arabic. 
--When using randomAssist feature to pick a chord from a chord map, whether the previous chord is M or m is disregarded. In the future, the diferentiator needs to be added.
--Another thing with randomAssist is that when M instead of maj Maj is inputed in the chords argument. Chord input will have to be strictly controlled in the frontend. When refactoring this function, special attention will have to be paid to tha Maj M translation from tonal to Scribbletune.
-*/
-function makeChords(params) {
-  let {
-    RN,
-    mode,
-    seventh,
-    chords,
-    repeatChords,
-    pattern,
-    subdiv,
-    randomAssist,
-    chordMap,
-    sizzle,
-    advChords,
-    open,
-    voicing,
-    octave,
-    bassNote,
-    splitChop,
-    splitter,
-  } = params;
-  seventh = humanToBool(seventh); //design choice: we convert all yes/no on/off values to boolean
-  repeatChords = humanToBool(repeatChords);
-  randomAssist = humanToBool(randomAssist);
-
-  switch (seventh) {
-    case false:
-      var chordSet = Mode.triads(mode, RN);
-      break;
-    case true:
-      var chordSet = Mode.seventhChords(mode, RN);
-      break;
-  }
-
-  if (!isNaN(chords)) chords = chords.toString();
-  if (!Array.isArray(chords)) chords = chords.split(' '); //we want to accept both strings and arrays
-  chords.forEach((chord, index) => (chords[index] = chords[index].toString())); //this is here because numbers need to be strings later
-  chords = romans(RN, chords); //we convert chords in roman numeral notation to absolute notation
-
-  chordSet.forEach((chord, index) => {
-    if (chordSet[index].indexOf('##') !== -1 || chordSet[index].indexOf('bb') !== -1)
-      chordSet[index] = Note.simplify(chordSet[index].substring(0, 3)) + chordSet[index].substring(3, 100);
-  }); //Pretty ilegible, I know. Sometimes tonal spits out C## instead of D etc, so we fix it in this line. Maybe better solution would be to adress all cases with multiple bs and #s, not just with 2.
-  chordSet.forEach((chord, index) => (chordSet[index] = chordSet[index].replace(/maj/g, 'M'))); // this step is necessary, because Scribbletune does not accept maj as a denotation of major chord, instead it accepts M
-  chordSet.forEach((chord, index) => (chordSet[index] = chordSet[index].replace(/Maj/g, 'M')));
-  chords.forEach((chord, index) => (chords[index] = chords[index].replace(/maj/g, 'M'))); //Thanks to this we can accept either the tonal.js or Scribbletune notation (maj vs M)
-  chords.forEach((chord, index) => (chords[index] = chords[index].replace(/Maj/g, 'M')));
-  chordSet.forEach((chord, index) => {
-    if (chordSet[index].length === 1) chordSet[index] = chordSet[index] + 'M';
-  }); //Also tonal.js sometimes calls major chords without "M", ie CM is just C. Scribbletune v4+ dont accept dat!
-  chordSet.forEach((chord, index) => {
-    if (chordSet[index].length === 2 && chordSet[index].indexOf('#') !== -1) chordSet[index] = chordSet[index] + 'M';
-  }); //just like the last one, except for black key notes
-  chordSet.forEach((chord, index) => {
-    if (chordSet[index].length === 2 && chordSet[index].indexOf('b') !== -1) chordSet[index] = chordSet[index] + 'M';
-  });
-
-  var chordsFinal = [];
-
-  for (let i = 0; i < chords.length; i++) {
-    //Here we convert numbers to chord names if numbers are present in the chords variable.
-
-    if (!isNaN(chords[i])) {
-      chordsFinal.push(chordSet[chords[i] - 1]);
-    } else {
-      chordsFinal.push(chords[i]);
-    }
-  }
-
-  const repeatchordsInputed = repeatChords; //this is here, because later the repeatChords variable needs to be reeveluated in a loop
-
-  switch (
-    randomAssist //Are we using the chordMap or not? Important branch that starts right here
-  ) {
-    case false: //We are not using the chordmap
-      for (let i = 0; i < chords.length; i++) {
-        let chordsPresent = chordSet.filter((element) => chordsFinal.includes(element)); //these 2 lines are here as a contingency for the upcoming while loop
-        if (chordsPresent.length == chordSet.length) repeatChords = true;
-
-        if (chords[i].indexOf('R') !== -1) {
-          switch (repeatChords) {
-            case false:
-              let arr = [];
-              while (arr.length < 1) {
-                let chordThatWasPicked = chordSet[diceRange(7, 0)];
-                if (chordsFinal.indexOf(chordThatWasPicked) === -1) arr.push(chordThatWasPicked);
-              }
-
-              chordsFinal[i] = arr[0];
-              break;
-
-            case true:
-              chordsFinal[i] = chordSet[diceRange(7, 0)];
-              break;
-          }
-
-          if (chords[i].length !== 1) {
-            //for advanced chords with R, like Rsus4
-
-            let currentRoot =
-              chordsFinal[i].charAt(1) === 'b' || chordsFinal[i].charAt(1) === '#'
-                ? (chordsFinal[i] = chordsFinal[i].charAt(0) + chordsFinal[i].charAt(1))
-                : (chordsFinal[i] = chordsFinal[i].charAt(0));
-            chordsFinal[i] = currentRoot + chords[i].substring(1);
-          }
-        }
-      }
-      break;
-
-    case true: //We are using the chordmap
-      for (let i = 0; i < chords.length; i++) {
-        if (repeatchordsInputed === false) repeatChords = false; //a necessary reevaluation of the repeatChords variable that is here because of the chordMap
-
-        if (i > 0) {
-          //the contingency here is slightly more complex, as it needs to take into account the previous chord in regards to the chordMap
-          var previousChordNumeral = absoluteToRelativeChord(RN, mode, chordsFinal[i - 1]);
-
-          let chordsPresent = chordSet.filter((element) => chordsFinal.includes(element)); //at this part of the contingency, we look at whether all chords are already present, just like in the previous contingency
-
-          if (chordsPresent.length == chordSet.length) repeatChords = true;
-
-          let chordsFromPreviousChord = []; //here we check whether all chords that would follow the previous chord according to the chordMap are present.
-          chordMap[previousChordNumeral].forEach((element) => chordsFromPreviousChord.push(chordSet[element - 1]));
-          let chordsPresentFromPreviousChord = chordsPresent.filter((element) =>
-            chordsFromPreviousChord.includes(element)
-          );
-
-          if (chordsFromPreviousChord.length == chordsPresentFromPreviousChord.length) repeatChords = true;
-        } //end of the contingency
-
-        if (chords[i].indexOf('R') !== -1) {
-          switch (repeatChords) {
-            case false:
-              if (i === 0) {
-                let arr = [];
-                while (arr.length < 1) {
-                  var chordsToPickFrom = chordMap[0];
-                  var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
-                  if (chordsFinal.indexOf(chordSet[chordThatWasPicked]) === -1) arr.push(chordSet[chordThatWasPicked]);
-                }
-                chordsFinal[i] = arr[0];
-              } else {
-                let arr = [];
-                while (arr.length < 1) {
-                  var chordsToPickFrom = chordMap[previousChordNumeral];
-                  var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
-                  if (chordsFinal.indexOf(chordSet[chordThatWasPicked]) === -1) arr.push(chordSet[chordThatWasPicked]);
-                }
-                chordsFinal[i] = arr[0];
-              }
-              break;
-
-            case true:
-              if (i === 0) {
-                var chordsToPickFrom = chordMap[0];
-                var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
-                chordsFinal[i] = chordSet[chordThatWasPicked];
-              } else {
-                var chordsToPickFrom = chordMap[previousChordNumeral];
-                var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
-                chordsFinal[i] = chordSet[chordThatWasPicked];
-              }
-
-              break;
-          }
-
-          if (chords[i].length !== 1) {
-            //for advanced chords with R, like Rsus4
-
-            let currentRoot =
-              chordsFinal[i].charAt(1) === 'b' || chordsFinal[i].charAt(1) === '#'
-                ? (chordsFinal[i] = chordsFinal[i].charAt(0) + chordsFinal[i].charAt(1))
-                : (chordsFinal[i] = chordsFinal[i].charAt(0));
-            chordsFinal[i] = currentRoot + chords[i].substring(1);
-          }
-        }
-      }
-      break;
-  }
-
-  for (let i = 0; i < chordsFinal.length; i++) {
-    //Here we have to loop through the chordsFinal array and fix any chords that Scribbletune cant read.
-    if (chordsFinal[i].indexOf('mb5') !== -1) chordsFinal[i] = chordsFinal[i].replace(/mb5/g, 'dim');
-    if (chordsFinal[i].indexOf('m7b5') !== -1) chordsFinal[i] = chordsFinal[i].replace(/m7b5/g, 'dim7');
-
-    if (
-      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('7') == 1) ||
-      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('#7') == 1) ||
-      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('b7') == 1)
-    )
-      chordsFinal[i] = chordsFinal[i] + 'th'; //Again with the th at the end of G7. the < 4 condition is there so we are able to accept crazy chords like D#7#11b13
-    if (chordsFinal[i].indexOf('thth') !== -1) chordsFinal[i] = chordsFinal[i].replace(/thth/g, 'th');
-  }
-
-  if (advChords !== 'none') {
-    //if we want to, we transform all the chords into any accepted crazy chord in the following 2 loops
-    chordsFinal.forEach((chord, index) => {
-      chordsFinal[index].charAt(1) === 'b' || chordsFinal[index].charAt(1) === '#'
-        ? (chordsFinal[index] = chordsFinal[index].charAt(0) + chordsFinal[index].charAt(1))
-        : (chordsFinal[index] = chordsFinal[index].charAt(0));
-    });
-    chordsFinal.forEach((chord, index) => {
-      chordsFinal[index] = chordsFinal[index] + advChords;
-    });
-  }
-  chordsFinal = chordsFinal.join(' ');
-
-  var scribbleClip = scribble.clip({
-    notes: chordsFinal,
-    pattern,
-    subdiv,
-    sizzle,
-  });
-
-  const rootNotes = []; //In these 3 steps we extract root notes of chords before they go to voicingCallback
-  scribbleClip.forEach((element) => {
-    element.note === null ? rootNotes.push('n') : rootNotes.push(element.note[0]);
-  });
-  rootNotes.forEach((chord, index) => {
-    rootNotes[index].charAt(1) === 'b' || rootNotes[index].charAt(1) === '#'
-      ? (rootNotes[index] = rootNotes[index].charAt(0) + rootNotes[index].charAt(1))
-      : (rootNotes[index] = rootNotes[index].charAt(0));
-  });
-
-  const voicingCallback = global[voicing]; //this is a way through which a function can be passed to another function as a string and yet it will still act as a callback
-  scribbleClip = voicingCallback(scribbleClip);
-
-  chordsToOctave(scribbleClip, octave);
-
-  if (open !== 0) openChords(scribbleClip, open);
-
-  if (bassNote !== 0) augmentChordsWithBassNote2(scribbleClip, rootNotes, bassNote);
-
-  if (splitter !== 0) var scribbleClip = chopOrSplit(scribbleClip, splitter, splitChop);
-
-  return [scribbleClip, chordsFinal];
-}
-
-/*
 Transposes a note in a chord.
 -scribbleClip accepts a Scribbletune clip
 -firstChord accepts number and it denotes at which chord in the scribbleclip array to start transposing
@@ -599,88 +342,44 @@ function translateChordMap(chordMapMatrixified) {
   return chordMap;
 }
 
-/*
-We chop up a clip by a given length
--scribbleClip accepts scribletune clip
--splitter accepts 1-5
--splitChop accepts "split" or "chop", determining whether to split or chop the clip. "halve" halves the clip the number of times splitter is
-*/
-function chopOrSplit(scribbleClip, splitter, splitChop) {
-  redeclareScribbleClip(scribbleClip);
+const chopSplitHalve = ({ splitChop, splitter }, scribbleClip) => {
+  if (splitter === 0) return scribbleClip;
 
-  if (splitter === 1) {
-    var splitter2 = 5;
-  }
-  if (splitter === 2) {
-    var splitter2 = 4;
-  }
-  if (splitter === 3) {
-    var splitter2 = 3;
-  }
-  if (splitter === 4) {
-    var splitter2 = 2;
-  }
-  if (splitter === 5) {
-    var splitter2 = 1;
-  }
+  const chopLength = [0, 1, 2, 4, 8, 16, 32, 64][splitter] * 16;
+  const newClip = [];
 
-  switch (splitter2) {
-    case 5: //1/8
-      var chopLength = 128;
-      break;
+  for (const step of scribbleClip) {
+    const stepLength = step.length;
+    const chops = Math.trunc(stepLength) / chopLength;
+    const newPart = { ...step, length: chopLength };
 
-    case 4: //1/4
-      var chopLength = 256;
-      break;
-
-    case 3: //1/2
-      var chopLength = 512;
-      break;
-
-    case 2: //1
-      var chopLength = 2048;
-      break;
-
-    case 1: //2
-      var chopLength = 4096;
-      break;
-  }
-
-  var newClip = [];
-
-  for (let i = 0; i < scribbleClip.length; i++) {
-    const partLength = scribbleClip[i].length;
-
-    const chops = Math.trunc(partLength) / chopLength;
-
-    const newPart = { note: scribbleClip[i].note, length: partLength / chops, level: scribbleClip[i].level };
-
-    for (let j = 0; j < chops; j++) {
+    for (let step2 = 0; step2 < chops; step2++) {
+      //split
       if (splitChop === 0) {
-        //split
         newClip.push(newPart);
-      } else if (splitChop === 1) {
-        //chop
-        const newPartNull = { note: null, length: partLength / chops, level: scribbleClip[i].level };
-        j % 2 === 0 ? newClip.push(newPart) : newClip.push(newPartNull);
+      }
+
+      //chop
+      if (splitChop === 1) {
+        const newPartNull = { ...step, note: null, length: chopLength };
+        step2 % 2 === 0 ? newClip.push(newPart) : newClip.push(newPartNull);
       }
     }
+
+    //halve
     if (splitChop === 2) {
-      //halve
-      var partLengthHalved = partLength;
-      var exp = 2;
-      for (let k = 0; k < splitter; k++) var partLengthHalved = partLengthHalved / 2;
-      for (let m = 0; m < splitter - 1; m++) var exp = exp * 2;
-      const newPartHalved = { note: scribbleClip[i].note, length: partLengthHalved, level: scribbleClip[i].level };
+      let stepLengthHalved = stepLength;
+      let exp = 2;
+
+      for (let k = 0; k < splitter; k++) stepLengthHalved = stepLengthHalved / 2;
+      for (let m = 0; m < splitter - 1; m++) exp = exp * 2;
+      const newPartHalved = { ...step, length: stepLengthHalved };
       for (let l = 0; l < exp; l++) newClip.push(newPartHalved);
     }
   }
 
-  //We return new clip, so scribbleclip needs to be redeclared
-  nullCleanup(newClip);
-  notesToArray(newClip);
   return newClip;
-}
+};
 
 function removeNotesFromChord(scribbleClip, firstChord, numOfChords, numNote) {
   if (isNaN(interval) == false) interval = Interval.fromSemitones(interval);
@@ -1187,34 +886,266 @@ global.Ascend_Highest = function Ascend_Highest(scribbleClip) {
   return scribbleClip;
 };
 
+/*
+Generates a chord progression. Returns a scribbleclip and the chord progression as a string, so it can be manipulated again.
+-RN accepts a string that denotes the root note of a key, ie 'C' of C major
+-mode accepts either of the 4 possible strings: "major", "minor", "ionian", "dorian", "phrygian", "lydian", "mixolydian", "aeolian", "locrian"
+-seventh denotes whether we will use seventh chords and accepts boolean.
+-chords accetps an array or string that denotes chords to use and where to pick random chords, ie 'CM7 1 2 R'. 'R' denotes that this time we pick a random chord. Numbers 1-7 are a standin for the Roman numeral chord notation. Chord names are accepted in both tonal.js Scribbletune ('maj' vs 'M').
+-repeatChords dictates whether randomly picked chords have a chance to be the same as chords already present in the progression.
+-pattern is the Scribbletune pattern
+-subdiv is the Sccribbletune subdiv
+-voicing accepts string and it looks for globally scoped functions with a name same as the string to execute on the scribbleclip.
+-octave accepts 0-5 and it denotes in which octave a root note of each chord should be
+-bassNote accepts 1 or 0 and it denotes whether there should be a root note at octave 0 added to each chord
+
+description to add: randomAssist, chordMap
+
+Notes:
+-For now we accept either names of chords or arabic numbers. In the future write function that will preceed this function with translation of roman to arabic. 
+-When using randomAssist feature to pick a chord from a chord map, whether the previous chord is M or m is disregarded. In the future, the diferentiator needs to be added.
+-Another thing with randomAssist is that when M instead of maj Maj is inputed in the chords argument. Chord input will have to be strictly controlled in the frontend. When refactoring this function, special attention will have to be paid to tha Maj M translation from tonal to Scribbletune.
+*/
+function makeChords(params) {
+  let {
+    RN,
+    mode,
+    seventh,
+    chords,
+    repeatChords,
+    pattern,
+    subdiv,
+    randomAssist,
+    chordMap,
+    sizzle,
+    advChords,
+    open,
+    voicing,
+    octave,
+    bassNote,
+    splitter,
+  } = params;
+  seventh = humanToBool(seventh); //design choice: we convert all yes/no on/off values to boolean
+  repeatChords = humanToBool(repeatChords);
+  randomAssist = humanToBool(randomAssist);
+
+  switch (seventh) {
+    case false:
+      var chordSet = Mode.triads(mode, RN);
+      break;
+    case true:
+      var chordSet = Mode.seventhChords(mode, RN);
+      break;
+  }
+
+  if (!isNaN(chords)) chords = chords.toString();
+  if (!Array.isArray(chords)) chords = chords.split(' '); //we want to accept both strings and arrays
+  chords.forEach((chord, index) => (chords[index] = chords[index].toString())); //this is here because numbers need to be strings later
+  chords = romans(RN, chords); //we convert chords in roman numeral notation to absolute notation
+
+  chordSet.forEach((chord, index) => {
+    if (chordSet[index].indexOf('##') !== -1 || chordSet[index].indexOf('bb') !== -1)
+      chordSet[index] = Note.simplify(chordSet[index].substring(0, 3)) + chordSet[index].substring(3, 100);
+  }); //Pretty ilegible, I know. Sometimes tonal spits out C## instead of D etc, so we fix it in this line. Maybe better solution would be to adress all cases with multiple bs and #s, not just with 2.
+  chordSet.forEach((chord, index) => (chordSet[index] = chordSet[index].replace(/maj/g, 'M'))); // this step is necessary, because Scribbletune does not accept maj as a denotation of major chord, instead it accepts M
+  chordSet.forEach((chord, index) => (chordSet[index] = chordSet[index].replace(/Maj/g, 'M')));
+  chords.forEach((chord, index) => (chords[index] = chords[index].replace(/maj/g, 'M'))); //Thanks to this we can accept either the tonal.js or Scribbletune notation (maj vs M)
+  chords.forEach((chord, index) => (chords[index] = chords[index].replace(/Maj/g, 'M')));
+  chordSet.forEach((chord, index) => {
+    if (chordSet[index].length === 1) chordSet[index] = chordSet[index] + 'M';
+  }); //Also tonal.js sometimes calls major chords without "M", ie CM is just C. Scribbletune v4+ dont accept dat!
+  chordSet.forEach((chord, index) => {
+    if (chordSet[index].length === 2 && chordSet[index].indexOf('#') !== -1) chordSet[index] = chordSet[index] + 'M';
+  }); //just like the last one, except for black key notes
+  chordSet.forEach((chord, index) => {
+    if (chordSet[index].length === 2 && chordSet[index].indexOf('b') !== -1) chordSet[index] = chordSet[index] + 'M';
+  });
+
+  var chordsFinal = [];
+
+  for (let i = 0; i < chords.length; i++) {
+    //Here we convert numbers to chord names if numbers are present in the chords variable.
+
+    if (!isNaN(chords[i])) {
+      chordsFinal.push(chordSet[chords[i] - 1]);
+    } else {
+      chordsFinal.push(chords[i]);
+    }
+  }
+
+  const repeatchordsInputed = repeatChords; //this is here, because later the repeatChords variable needs to be reeveluated in a loop
+
+  switch (
+    randomAssist //Are we using the chordMap or not? Important branch that starts right here
+  ) {
+    case false: //We are not using the chordmap
+      for (let i = 0; i < chords.length; i++) {
+        let chordsPresent = chordSet.filter((element) => chordsFinal.includes(element)); //these 2 lines are here as a contingency for the upcoming while loop
+        if (chordsPresent.length == chordSet.length) repeatChords = true;
+
+        if (chords[i].indexOf('R') !== -1) {
+          switch (repeatChords) {
+            case false:
+              let arr = [];
+              while (arr.length < 1) {
+                let chordThatWasPicked = chordSet[diceRange(7, 0)];
+                if (chordsFinal.indexOf(chordThatWasPicked) === -1) arr.push(chordThatWasPicked);
+              }
+
+              chordsFinal[i] = arr[0];
+              break;
+
+            case true:
+              chordsFinal[i] = chordSet[diceRange(7, 0)];
+              break;
+          }
+
+          if (chords[i].length !== 1) {
+            //for advanced chords with R, like Rsus4
+
+            let currentRoot =
+              chordsFinal[i].charAt(1) === 'b' || chordsFinal[i].charAt(1) === '#'
+                ? (chordsFinal[i] = chordsFinal[i].charAt(0) + chordsFinal[i].charAt(1))
+                : (chordsFinal[i] = chordsFinal[i].charAt(0));
+            chordsFinal[i] = currentRoot + chords[i].substring(1);
+          }
+        }
+      }
+      break;
+
+    case true: //We are using the chordmap
+      for (let i = 0; i < chords.length; i++) {
+        if (repeatchordsInputed === false) repeatChords = false; //a necessary reevaluation of the repeatChords variable that is here because of the chordMap
+
+        if (i > 0) {
+          //the contingency here is slightly more complex, as it needs to take into account the previous chord in regards to the chordMap
+          var previousChordNumeral = absoluteToRelativeChord(RN, mode, chordsFinal[i - 1]);
+
+          let chordsPresent = chordSet.filter((element) => chordsFinal.includes(element)); //at this part of the contingency, we look at whether all chords are already present, just like in the previous contingency
+
+          if (chordsPresent.length == chordSet.length) repeatChords = true;
+
+          let chordsFromPreviousChord = []; //here we check whether all chords that would follow the previous chord according to the chordMap are present.
+          chordMap[previousChordNumeral].forEach((element) => chordsFromPreviousChord.push(chordSet[element - 1]));
+          let chordsPresentFromPreviousChord = chordsPresent.filter((element) =>
+            chordsFromPreviousChord.includes(element)
+          );
+
+          if (chordsFromPreviousChord.length == chordsPresentFromPreviousChord.length) repeatChords = true;
+        } //end of the contingency
+
+        if (chords[i].indexOf('R') !== -1) {
+          switch (repeatChords) {
+            case false:
+              if (i === 0) {
+                let arr = [];
+                while (arr.length < 1) {
+                  var chordsToPickFrom = chordMap[0];
+                  var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
+                  if (chordsFinal.indexOf(chordSet[chordThatWasPicked]) === -1) arr.push(chordSet[chordThatWasPicked]);
+                }
+                chordsFinal[i] = arr[0];
+              } else {
+                let arr = [];
+                while (arr.length < 1) {
+                  var chordsToPickFrom = chordMap[previousChordNumeral];
+                  var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
+                  if (chordsFinal.indexOf(chordSet[chordThatWasPicked]) === -1) arr.push(chordSet[chordThatWasPicked]);
+                }
+                chordsFinal[i] = arr[0];
+              }
+              break;
+
+            case true:
+              if (i === 0) {
+                var chordsToPickFrom = chordMap[0];
+                var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
+                chordsFinal[i] = chordSet[chordThatWasPicked];
+              } else {
+                var chordsToPickFrom = chordMap[previousChordNumeral];
+                var chordThatWasPicked = chordsToPickFrom[diceRange(chordsToPickFrom.length, 0)] - 1;
+                chordsFinal[i] = chordSet[chordThatWasPicked];
+              }
+
+              break;
+          }
+
+          if (chords[i].length !== 1) {
+            //for advanced chords with R, like Rsus4
+
+            let currentRoot =
+              chordsFinal[i].charAt(1) === 'b' || chordsFinal[i].charAt(1) === '#'
+                ? (chordsFinal[i] = chordsFinal[i].charAt(0) + chordsFinal[i].charAt(1))
+                : (chordsFinal[i] = chordsFinal[i].charAt(0));
+            chordsFinal[i] = currentRoot + chords[i].substring(1);
+          }
+        }
+      }
+      break;
+  }
+
+  for (let i = 0; i < chordsFinal.length; i++) {
+    //Here we have to loop through the chordsFinal array and fix any chords that Scribbletune cant read.
+    if (chordsFinal[i].indexOf('mb5') !== -1) chordsFinal[i] = chordsFinal[i].replace(/mb5/g, 'dim');
+    if (chordsFinal[i].indexOf('m7b5') !== -1) chordsFinal[i] = chordsFinal[i].replace(/m7b5/g, 'dim7');
+
+    if (
+      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('7') == 1) ||
+      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('#7') == 1) ||
+      (chordsFinal[i].length < 4 && chordsFinal[i].indexOf('b7') == 1)
+    )
+      chordsFinal[i] = chordsFinal[i] + 'th'; //Again with the th at the end of G7. the < 4 condition is there so we are able to accept crazy chords like D#7#11b13
+    if (chordsFinal[i].indexOf('thth') !== -1) chordsFinal[i] = chordsFinal[i].replace(/thth/g, 'th');
+  }
+
+  if (advChords !== 'none') {
+    //if we want to, we transform all the chords into any accepted crazy chord in the following 2 loops
+    chordsFinal.forEach((chord, index) => {
+      chordsFinal[index].charAt(1) === 'b' || chordsFinal[index].charAt(1) === '#'
+        ? (chordsFinal[index] = chordsFinal[index].charAt(0) + chordsFinal[index].charAt(1))
+        : (chordsFinal[index] = chordsFinal[index].charAt(0));
+    });
+    chordsFinal.forEach((chord, index) => {
+      chordsFinal[index] = chordsFinal[index] + advChords;
+    });
+  }
+  chordsFinal = chordsFinal.join(' ');
+
+  var scribbleClip = scribble.clip({
+    notes: chordsFinal,
+    pattern,
+    subdiv,
+    sizzle,
+  });
+
+  const rootNotes = []; //In these 3 steps we extract root notes of chords before they go to voicingCallback
+  scribbleClip.forEach((element) => {
+    element.note === null ? rootNotes.push('n') : rootNotes.push(element.note[0]);
+  });
+  rootNotes.forEach((chord, index) => {
+    rootNotes[index].charAt(1) === 'b' || rootNotes[index].charAt(1) === '#'
+      ? (rootNotes[index] = rootNotes[index].charAt(0) + rootNotes[index].charAt(1))
+      : (rootNotes[index] = rootNotes[index].charAt(0));
+  });
+
+  const voicingCallback = global[voicing]; //this is a way through which a function can be passed to another function as a string and yet it will still act as a callback
+  scribbleClip = voicingCallback(scribbleClip);
+
+  chordsToOctave(scribbleClip, octave);
+
+  if (open !== 0) openChords(scribbleClip, open);
+
+  if (bassNote !== 0) augmentChordsWithBassNote2(scribbleClip, rootNotes, bassNote);
+
+  if (splitter !== 0) var scribbleClip = chopSplitHalve(params, scribbleClip);
+
+  return [scribbleClip, chordsFinal];
+}
+
 module.exports = {
   makeChords,
   translateChordMap,
 };
-
-/*
-const clipScribble = scribble.clip({
-    notes: 'A#dim D#m G#m C1',
-    pattern: 'x-x-x-x',
-    subdiv: '2n'
-});
-
-/*
-const chordMap =
-    [
-        [1, 2, 3, 4, 5, 6, 7],
-        [2, 3, 4, 5, 6, 7],
-        [3, 4, 5],
-        [1, 2, 4, 6],
-        [1, 3, 5, 6],
-        [1, 4, 6],
-        [1, 2, 4, 5],
-        [1, 4, 6],
-    ]
-
-console.log(makeChords("C", "major", false, "A#dim", true, "x-xx", "4n", 0, chordMap, "sin","none", 0, "Venus_Chords", 3, 1, "split", 0)[0])
-//for (i = 0; i < 30; i++)console.log(makeChords("C", "major", true, "R R R R R", false, "xx", "4n", 0, chordMap, "sin", "none", 0, "Venus_Chords", 1, 0, "split", 0)[1])
-*/
 
 // const asd = makeChords({
 //   chordMap: [

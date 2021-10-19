@@ -967,7 +967,7 @@ function makeChords(params) {
     //Here we convert numbers to chord names if numbers are present in the chords variable.
 
     if (!isNaN(chords[i])) {
-      chordsFinal.push(chordSet[chords[i] - 1]);
+      chordsFinal.push(chordSet[chords[i]]);
     } else {
       chordsFinal.push(chords[i]);
     }

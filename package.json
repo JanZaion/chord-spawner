@@ -21,6 +21,7 @@
   "homepage": "https://github.com/JanZaion/8-chords#readme",
   "dependencies": {
     "@tonaljs/tonal": "^4.6.5",
+    "convenient-methods-of-randomness": "^1.0.2",
     "scribbletune": "^3.2.1"
   }
 }

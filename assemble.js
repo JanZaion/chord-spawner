@@ -1,6 +1,9 @@
 const maxApi = require('max-api');
 const { makeChords, translateChordMap } = require('./makeChords');
 const { scribbleClipToMidiSteps } = require('./scribbleClipToMidiSteps');
+const { getNotes } = require('./getNotesChords');
+const { getClip } = require('./getClipChords');
+const { rhythmAlgos } = require('./rhythmAlgosChords');
 
 const make = async () => {
   const main = await maxApi.getDict('main');
@@ -25,6 +28,34 @@ const make = async () => {
   ]);
 
   maxApi.outlet('render');
+};
+
+const generateRhythm = async () => {
+  const main = await maxApi.getDict('main');
+  const { rhythmAlgo } = main;
+
+  maxApi.outlet(`pattern ${rhythmAlgos[rhythmAlgo].algo(main)}`);
+  maxApi.outlet(`gatedBang`);
+};
+
+const getPattern = async () => {
+  const parsed = await getNotes('steps');
+
+  const clipData = getClip(parsed);
+
+  if (clipData) {
+    const { pattern, subdiv } = clipData;
+
+    maxApi.outlet(`pattern ${pattern}`);
+    maxApi.outlet(`subdiv ${subdiv}`);
+  }
+};
+
+const patternDescription = async () => {
+  const main = await maxApi.getDict('main');
+  const { rhythmAlgo } = main;
+
+  maxApi.outlet(`description ${rhythmAlgos[rhythmAlgo].description}`);
 };
 
 const initial = async () => {
@@ -54,6 +85,7 @@ const initial = async () => {
     patterns: 'xxxx',
     pattern: 'xxxx',
     chords: ['R', 'R', 'R', 'R'],
+    rhythmAlgo: 'long_wild',
   });
 
   maxApi.outlet('initial');
@@ -61,3 +93,6 @@ const initial = async () => {
 
 maxApi.addHandler('make', make);
 maxApi.addHandler('Init', initial);
+maxApi.addHandler('getPattern', getPattern);
+maxApi.addHandler('generateRhythm', generateRhythm);
+maxApi.addHandler('patternDescription', patternDescription);

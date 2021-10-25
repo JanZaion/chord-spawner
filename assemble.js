@@ -39,7 +39,7 @@ const generateRhythm = async () => {
 };
 
 const getPattern = async () => {
-  const parsed = await getNotes('steps');
+  const parsed = await getNotes('stepsFromLive');
 
   const clipData = getClip(parsed);
 

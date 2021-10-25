@@ -508,39 +508,35 @@ function openChords(scribbleClip, open) {
   return scribbleClip;
 }
 
-global.none = function none(scribbleClip) {
-  return scribbleClip;
-};
-
 /*
 Takes the 2nd and the 4th (7th) notes and transposes them an octave higher. If there is no 4th note, it transposes only the 2nd.
 */
-global.Venus_Chords = function Venus_Chords(scribbleClip) {
+function Venus_Chords(scribbleClip) {
   scribbleClip = transposeNotesInChord(scribbleClip, 1, Infinity, [2, 4], '8P');
   return scribbleClip;
-};
+}
 
-global.Root_Note_Only = function Root_Note_Only(scribbleClip) {
+function Root_Note_Only(scribbleClip) {
   removeNotesFromChord(scribbleClip, 1, Infinity, [2, 3, 4, 5, 6, 7, 8, 9]);
   return scribbleClip;
-};
+}
 
-global.Mediant_Note_Only = function Mediant_Note_Only(scribbleClip) {
+function Mediant_Note_Only(scribbleClip) {
   removeNotesFromChord(scribbleClip, 1, Infinity, [1, 3, 4, 5, 6, 7, 8, 9]);
   return scribbleClip;
-};
+}
 
-global.Dominant_Note_Only = function Dominant_Note_Only(scribbleClip) {
+function Dominant_Note_Only(scribbleClip) {
   removeNotesFromChord(scribbleClip, 1, Infinity, [1, 2, 4, 5, 6, 7, 8, 9]);
   return scribbleClip;
-};
+}
 
-global.Seventh_Note_Only = function Seventh_Note_Only(scribbleClip) {
+function Seventh_Note_Only(scribbleClip) {
   removeNotesFromChord(scribbleClip, 1, Infinity, [1, 2, 3, 5, 6, 7, 8, 9]);
   return scribbleClip;
-};
+}
 
-global.Random_Note_Only = function Random_Note_Only(scribbleClip) {
+function Random_Note_Only(scribbleClip) {
   const chordPositions = [];
 
   scribbleClip.forEach((e, i) => {
@@ -554,34 +550,44 @@ global.Random_Note_Only = function Random_Note_Only(scribbleClip) {
   }
 
   return scribbleClip;
-};
+}
+
+function Root_and_Mediant(scribbleClip) {
+  removeNotesFromChord(scribbleClip, 1, Infinity, [3, 5, 6, 7, 8, 9]);
+  return scribbleClip;
+}
+
+function Power_Chords(scribbleClip) {
+  removeNotesFromChord(scribbleClip, 1, Infinity, [2, 4, 5, 6, 7, 8, 9]);
+  return scribbleClip;
+}
 
 //Transposes the root note an octave higher
-global.Inversion_1 = function Inversion_1(scribbleClip) {
+function Inversion_1(scribbleClip) {
   scribbleClip = transposeNotesInChord(scribbleClip, 1, Infinity, [1], '8P');
   return scribbleClip;
-};
+}
 
 //Transposes the root and the mediant note an octave higher
-global.Inversion_2 = function Inversion_2(scribbleClip) {
+function Inversion_2(scribbleClip) {
   scribbleClip = transposeNotesInChord(scribbleClip, 1, Infinity, [1, 2], '8P');
   return scribbleClip;
-};
+}
 
 //Transposes the root, mediant and dominant note an octave higher
-global.Inversion_3 = function Inversion_3(scribbleClip) {
+function Inversion_3(scribbleClip) {
   scribbleClip = transposeNotesInChord(scribbleClip, 1, Infinity, [1, 2, 3], '8P');
   return scribbleClip;
-};
+}
 
 //Removes the dominant note. Should be used with seventh chords for propper shell voicing
-global.Shell_Voicing = function Shell_Voicing(scribbleClip) {
+function Shell_Voicing(scribbleClip) {
   scribbleClip = removeNotesFromChord(scribbleClip, 1, Infinity, [3]);
   return scribbleClip;
-};
+}
 
 //Transposes the highest note an octave lower
-global.Drop_1 = function Drop_1(scribbleClip) {
+function Drop_1(scribbleClip) {
   let chordPos = 0;
   for (let i = 0; i < scribbleClip.length; i++) {
     if (scribbleClip[i].note !== null) {
@@ -590,10 +596,10 @@ global.Drop_1 = function Drop_1(scribbleClip) {
     }
   }
   return scribbleClip;
-};
+}
 
 //Transposes the second highest note an octave lower
-global.Drop_2 = function Drop_2(scribbleClip) {
+function Drop_2(scribbleClip) {
   let chordPos = 0;
   for (let i = 0; i < scribbleClip.length; i++) {
     if (scribbleClip[i].note !== null) {
@@ -602,10 +608,10 @@ global.Drop_2 = function Drop_2(scribbleClip) {
     }
   }
   return scribbleClip;
-};
+}
 
 //Transposes the third highest note an octave lower
-global.Drop_3 = function Drop_3(scribbleClip) {
+function Drop_3(scribbleClip) {
   let chordPos = 0;
   for (let i = 0; i < scribbleClip.length; i++) {
     if (scribbleClip[i].note !== null) {
@@ -614,10 +620,10 @@ global.Drop_3 = function Drop_3(scribbleClip) {
     }
   }
   return scribbleClip;
-};
+}
 
 //Transposes the fourth highest note an octave lower
-global.Drop_4 = function Drop_4(scribbleClip) {
+function Drop_4(scribbleClip) {
   let chordPos = 0;
   for (let i = 0; i < scribbleClip.length; i++) {
     if (scribbleClip[i].note !== null) {
@@ -626,10 +632,10 @@ global.Drop_4 = function Drop_4(scribbleClip) {
     }
   }
   return scribbleClip;
-};
+}
 
 //Looks at the root note of the first chord. If any other note is in a higher octave, it transposes it an octave lower. If any other note is in a lower octave, it transposes it an octave higher.
-global.Single_Octave_Chords = function Single_Octave_Chords(scribbleClip) {
+function Single_Octave_Chords(scribbleClip) {
   const octave = Note.octave(scribbleClip[0].note[0]);
 
   let chordPos = 0;
@@ -646,10 +652,10 @@ global.Single_Octave_Chords = function Single_Octave_Chords(scribbleClip) {
     }
   }
   return scribbleClip;
-};
+}
 
 //It looks at the previous chord and if there is a the same note at a different octave, it transposes the previous an octave higher or lower to the dirrection of the respective previous note.
-global.Same_Notes = function Same_Notes(scribbleClip) {
+function Same_Notes(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -678,10 +684,10 @@ global.Same_Notes = function Same_Notes(scribbleClip) {
   }
 
   return scribbleClip;
-};
+}
 
 //It looks at the first chord of the progression and if there is any note an octave higher than the highest note of the first chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.
-global.First_Chord_Trim = function First_Chord_Trim(scribbleClip) {
+function First_Chord_Trim(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -704,10 +710,10 @@ global.First_Chord_Trim = function First_Chord_Trim(scribbleClip) {
   }
 
   return scribbleClip;
-};
+}
 
 //It looks at the last chord of the progression and if there is any note an octave higher than the highest note of the last chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.
-global.Last_Chord_Trim = function Last_Chord_Trim(scribbleClip) {
+function Last_Chord_Trim(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -730,10 +736,10 @@ global.Last_Chord_Trim = function Last_Chord_Trim(scribbleClip) {
   }
 
   return scribbleClip;
-};
+}
 
 //The lowest note of every chord is always lower or equal to the lowest note of the chord preceeding it.
-global.Descend = function Descend(scribbleClip) {
+function Descend(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -769,10 +775,10 @@ global.Descend = function Descend(scribbleClip) {
   inner(scribbleClip, chordPositions);
 
   return scribbleClip;
-};
+}
 
 //The highest note of every chord is always lower or equal to the highest note of the chord preceeding it
-global.Descend_Highest = function Descend_Highest(scribbleClip) {
+function Descend_Highest(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -808,10 +814,10 @@ global.Descend_Highest = function Descend_Highest(scribbleClip) {
   inner(scribbleClip, chordPositions);
 
   return scribbleClip;
-};
+}
 
 //The lowest note of every chord is always higher or equal to the lowest of the chord preceeding it
-global.Ascend = function Ascend(scribbleClip) {
+function Ascend(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -846,10 +852,10 @@ global.Ascend = function Ascend(scribbleClip) {
   inner(scribbleClip, chordPositions);
 
   return scribbleClip;
-};
+}
 
 //The highest note of every chord is always higher or equal to the highest of the chord preceeding it
-global.Ascend_Highest = function Ascend_Highest(scribbleClip) {
+function Ascend_Highest(scribbleClip) {
   const chordPositions = [];
 
   for (let i = 0; i < scribbleClip.length; i++) if (scribbleClip[i].note !== null) chordPositions.push(i);
@@ -884,7 +890,142 @@ global.Ascend_Highest = function Ascend_Highest(scribbleClip) {
   inner(scribbleClip, chordPositions);
 
   return scribbleClip;
-};
+}
+
+const voicingAlgos = [
+  {
+    name: 'none',
+    algo: (scribbleClip) => scribbleClip,
+    description: 'Chords are left in their basic position.',
+  },
+  {
+    name: 'venus chords',
+    algo: Venus_Chords,
+    description:
+      'Takes the 2nd and the 4th (7th) notes and transposes them an octave higher. If there is no 4th note, it transposes only the 2nd.',
+  },
+  {
+    name: 'root note only',
+    algo: Root_Note_Only,
+    description: 'Renders only the root note of the chords.',
+  },
+  {
+    name: 'mediant note only',
+    algo: Mediant_Note_Only,
+    description: 'Renders only the mediant note of the chords.',
+  },
+  {
+    name: 'dominant note only',
+    algo: Dominant_Note_Only,
+    description: 'Renders only the dominant note of the chords.',
+  },
+  {
+    name: 'seventh note only',
+    algo: Seventh_Note_Only,
+    description: 'Renders only the seventh note of the chords.',
+  },
+  {
+    name: 'random note only',
+    algo: Random_Note_Only,
+    description: 'Renders a random note from each chord.',
+  },
+  {
+    name: 'root and mediant',
+    algo: Root_and_Mediant,
+    description: 'Renders the root note and the mediant note from each chord.',
+  },
+  {
+    name: 'power chords',
+    algo: Power_Chords,
+    description: 'Renders the root note and the dominant note from each chord.',
+  },
+  {
+    name: 'inversion 1',
+    algo: Inversion_1,
+    description: 'Transposes the root note an octave higher.',
+  },
+  {
+    name: 'inversion 2',
+    algo: Inversion_2,
+    description: 'Transposes the root and the mediant note an octave higher.',
+  },
+  {
+    name: 'inversion 3',
+    algo: Inversion_3,
+    description: 'Transposes the root, mediant and dominant note an octave higher.',
+  },
+  {
+    name: 'shell voicing',
+    algo: Shell_Voicing,
+    description: 'Removes the dominant note. Should be used with seventh chords for propper shell voicing.',
+  },
+  {
+    name: 'drop 1',
+    algo: Drop_1,
+    description: 'Transposes the highest note an octave lower.',
+  },
+  {
+    name: 'drop 2',
+    algo: Drop_2,
+    description: 'Transposes the second highest note an octave lower.',
+  },
+  {
+    name: 'drop 3',
+    algo: Drop_3,
+    description: 'Transposes the third highest note an octave lower.',
+  },
+  {
+    name: 'drop 4',
+    algo: Drop_4,
+    description: 'Transposes the fourth highest note an octave lower.',
+  },
+  {
+    name: 'single octave chords',
+    algo: Single_Octave_Chords,
+    description:
+      'Looks at the root note of the first chord. If any other note is in a higher octave, it transposes it an octave lower. If any other note is in a lower octave, it transposes it an octave higher.',
+  },
+  {
+    name: 'same notes',
+    algo: Same_Notes,
+    description:
+      'It looks at the previous chord and if there is a the same note at a different octave, it transposes the previous an octave higher or lower to the dirrection of the respective previous note.',
+  },
+  {
+    name: 'first chord trim',
+    algo: First_Chord_Trim,
+    description:
+      'It looks at the previous chord and if there is a the same note at a different octave, it transposes the previous an octave higher or lower to the dirrection of the respective previous note.',
+  },
+  {
+    name: 'last chord trim',
+    algo: Last_Chord_Trim,
+    description:
+      'It looks at the first chord of the progression and if there is any note an octave higher than the highest note of the first chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.',
+  },
+  {
+    name: 'descend',
+    algo: Descend,
+    description:
+      'The lowest note of every chord is always lower or equal to the lowest note of the chord preceeding it.',
+  },
+  {
+    name: 'descend highest',
+    algo: Descend_Highest,
+    description:
+      'The highest note of every chord is always lower or equal to the highest note of the chord preceeding it.',
+  },
+  {
+    name: 'ascend',
+    algo: Ascend,
+    description: 'The lowest note of every chord is always higher or equal to the lowest of the chord preceeding it.',
+  },
+  {
+    name: 'ascend highest',
+    algo: Ascend_Highest,
+    description: 'The highest note of every chord is always higher or equal to the highest of the chord preceeding it',
+  },
+];
 
 /*
 Generates a chord progression. Returns a scribbleclip and the chord progression as a string, so it can be manipulated again.
@@ -920,7 +1061,7 @@ function makeChords(params) {
     sizzle,
     advChords,
     open,
-    voicing,
+    voicingInt,
     octave,
     bassNote,
     splitter,
@@ -1128,16 +1269,17 @@ function makeChords(params) {
       : (rootNotes[index] = rootNotes[index].charAt(0));
   });
 
-  const voicingCallback = global[voicing]; //this is a way through which a function can be passed to another function as a string and yet it will still act as a callback
-  scribbleClip = voicingCallback(scribbleClip);
+  // const voicingCallback = global[voicing]; //this is a way through which a function can be passed to another function as a string and yet it will still act as a callback
+  // scribbleClip = voicingCallback(scribbleClip);
+  scribbleClip = voicingAlgos[voicingInt].algo(scribbleClip);
 
   chordsToOctave(scribbleClip, octave);
 
-  if (open !== 0) openChords(scribbleClip, open);
+  if (open) openChords(scribbleClip, open);
 
-  if (bassNote !== 0) augmentChordsWithBassNote2(scribbleClip, rootNotes, bassNote);
+  if (bassNote) augmentChordsWithBassNote2(scribbleClip, rootNotes, bassNote);
 
-  if (splitter !== 0) var scribbleClip = chopSplitHalve(params, scribbleClip);
+  if (splitter) var scribbleClip = chopSplitHalve(params, scribbleClip);
 
   return [scribbleClip, chordsFinal];
 }
@@ -1145,6 +1287,7 @@ function makeChords(params) {
 module.exports = {
   makeChords,
   translateChordMap,
+  voicingAlgos,
 };
 
 // const asd = makeChords({

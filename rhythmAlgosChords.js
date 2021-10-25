@@ -98,51 +98,43 @@ const flip = ({ pattern }) => {
 
 const reversePattern = ({ pattern }) => [...splitPattern(pattern, false)].reverse().join('');
 
-const rhythmAlgos = {
-  long_wild: {
-    algo: () => {
-      return wildMild('wild', 'long');
-    },
+const rhythmAlgos = [
+  {
+    name: 'generate long wild pattern',
+    algo: () => wildMild('wild', 'long'),
     description:
       'Generates a rhythm comprised of 4 xs and 12 _s while xs have a chance to appear anywhere in the pattern.',
   },
-  long_mild: {
-    algo: () => {
-      return wildMild('mild', 'long');
-    },
+  {
+    name: 'generate long mild pattern',
+    algo: () => wildMild('mild', 'long'),
     description:
       'Generates a rhythm comprised of 4 xs and 12 _s while there is always 1 x present at each quarter of the pattern.',
   },
-  short_wild: {
-    algo: () => {
-      return wildMild('wild', 'short');
-    },
+  {
+    name: 'generate short wild pattern',
+    algo: () => wildMild('wild', 'short'),
     description:
       'Generates a rhythm comprised of 4 xs and 4 _s while xs have a chance to appear anywhere in the pattern.',
   },
-  short_mild: {
-    algo: () => {
-      return wildMild('mild', 'short');
-    },
+  {
+    name: 'generate short mild pattern',
+    algo: () => wildMild('mild', 'short'),
     description:
       'Generates a rhythm comprised of 4 xs and 4 _s while there is always 1 x present at each quarter of the pattern.',
   },
-  reshuffleSpaced: {
-    algo: (params) => reshuffle(params, true),
-    description: 'Randomly reshuffles xs in the pattern, while xs keep their length or the spaces that follow them.',
-  },
-  reshuffleUnspaced: {
+  {
+    name: 'reshuffle xs and -s',
     algo: (params) => reshuffle(params, false),
     description: 'Randomly reshuffles xs and -s in the pattern.',
   },
-  flip: {
-    algo: flip,
-    description: 'Where there were spaces, there are now notes and visa versa.',
+  {
+    name: 'reshuffle x-s',
+    algo: (params) => reshuffle(params, true),
+    description: 'Randomly reshuffles xs in the pattern, while xs keep their length or the spaces that follow them.',
   },
-  reverse: {
-    algo: reversePattern,
-    description: 'Reverses the order of the rhythmic pattern',
-  },
-};
+  { name: 'flip', algo: flip, description: 'Where there were spaces, there are now notes and visa versa.' },
+  { name: 'reverse', algo: reversePattern, description: 'Reverses the order of the rhythmic pattern' },
+];
 
 module.exports = { rhythmAlgos };

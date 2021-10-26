@@ -48,7 +48,7 @@ const sortStartTimesAndPitches = (notes) => {
 const quantize = (number, block, allowZero) => {
   const absoluteNumber = number.toFixed(3) * 1000; //always assuming floats
   const divider = block * 1000; //need to get rid of floats for equality evaluation
-  if (absoluteNumber % divider === 0) return number;
+  if (absoluteNumber % divider === 0) return absoluteNumber / 1000;
   if (number < 0) return 0;
 
   let numberGoUp = absoluteNumber;

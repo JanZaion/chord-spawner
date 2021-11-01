@@ -995,13 +995,13 @@ const voicingAlgos = [
     name: 'first chord trim',
     algo: First_Chord_Trim,
     description:
-      'It looks at the previous chord and if there is a the same note at a different octave, it transposes the previous an octave higher or lower to the dirrection of the respective previous note.',
+      'It looks at the first chord of the progression and if there is any note an octave higher than the highest note of the first chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.',
   },
   {
     name: 'last chord trim',
     algo: Last_Chord_Trim,
     description:
-      'It looks at the first chord of the progression and if there is any note an octave higher than the highest note of the first chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.',
+      'It looks at the last chord of the progression and if there is any note an octave higher than the highest note of the last chord in the following chords, it transposes the note an octave lower. Visa versa with lower notes.',
   },
   {
     name: 'descend',

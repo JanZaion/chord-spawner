@@ -201,6 +201,8 @@ const getClip = ({ notes, totalDuration }) => {
     };
   });
 
+  const quantizedDuration = quantize(totalDuration, block, false);
+
   const notesSortedOne = sortStartTimesAndPitches(quantizedNotes);
 
   const noOverlapSteps = checkOverlaps(notesSortedOne, block);
@@ -211,7 +213,7 @@ const getClip = ({ notes, totalDuration }) => {
 
   const noteNames = dechordifiedNotes.map((step) => Note.fromMidi(step.pitch - 12)).join(' '); //-12 because of the middle C octave transpose
 
-  const spacedSteps = createSpacedSteps(dechordifiedNotes, totalDuration);
+  const spacedSteps = createSpacedSteps(dechordifiedNotes, quantizedDuration);
 
   const subdivInfo = subdivFromSpacedSteps(spacedSteps, block);
 

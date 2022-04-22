@@ -1,3 +1,5 @@
+// !!!DISCLAIMER: there is a lot of naive and poorly written code in this file. Most of the stuff here I wrote when I was first learning Javascript, hence the naive style.
+
 'use strict';
 const scribble = require('scribbletune');
 const { Note, Interval, interval, Progression, Mode } = require('@tonaljs/tonal');
@@ -1289,31 +1291,3 @@ module.exports = {
   translateChordMap,
   voicingAlgos,
 };
-
-// const asd = makeChords({
-//   chordMap: [
-//     0, 0, 1, 1, 0, 1, 2, 0, 1, 3, 0, 1, 4, 0, 1, 5, 0, 1, 6, 0, 1, 0, 1, 0, 1, 1, 1, 2, 1, 1, 3, 1, 1, 4, 1, 1, 5, 1, 1,
-//     6, 1, 1, 0, 2, 0, 1, 2, 0, 2, 2, 1, 3, 2, 1, 4, 2, 1, 5, 2, 0, 6, 2, 0, 0, 3, 1, 1, 3, 1, 2, 3, 0, 3, 3, 1, 4, 3, 0,
-//     5, 3, 1, 6, 3, 0, 0, 4, 1, 1, 4, 0, 2, 4, 1, 3, 4, 0, 4, 4, 1, 5, 4, 1, 6, 4, 0, 0, 5, 1, 1, 5, 0, 2, 5, 0, 3, 5, 1,
-//     4, 5, 0, 5, 5, 1, 6, 5, 0, 0, 6, 1, 1, 6, 1, 2, 6, 0, 3, 6, 1, 4, 6, 1, 5, 6, 0, 6, 6, 0, 0, 7, 1, 1, 7, 0, 2, 7, 0,
-//     3, 7, 1, 4, 7, 0, 5, 7, 1, 6, 7, 0,
-//   ],
-//   bassNote: 0,
-//   open: 0,
-//   randomAssist: 1,
-//   repeatChords: 1,
-//   seventh: 0,
-//   splitChop: 0,
-//   RN: 'Fb',
-//   mode: 'Major',
-//   octave: 0,
-//   sizzle: 'sin',
-//   advChords: 'none',
-//   voicing: 'none',
-//   subdiv: '4n',
-//   splitter: 0,
-//   chordPatterns: ['R', 'R', 'R', 'R'],
-//   patterns: 'xxxx',
-//   pattern: 'xxxx',
-//   chords: ['R', 'R', 'R', 'R'],
-// });

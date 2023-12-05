@@ -1,9 +1,13 @@
+var clipToSelect = new LiveAPI();
+
+//returns whats selected
 function clipOrSlot() {
-  var clipToSelect = new LiveAPI('live_set view detail_clip');
+  clipToSelect.path = 'live_set view detail_clip';
   if (clipToSelect) {
     return clipToSelect;
   } else {
-    return new LiveAPI('live_set view highlighted_clip_slot clip');
+    clipToSelect.path = 'live_set view highlighted_clip_slot clip';
+    return clipToSelect;
   }
 }
 
@@ -35,11 +39,13 @@ function liveTen(clip) {
   return notes;
 }
 
+var liveVersion = new LiveAPI();
+
 function getLive(dictName) {
   var clip = clipOrSlot();
-  var live = new LiveAPI('live_app');
+  liveVersion.path = 'live_app';
 
-  if (live.call('get_major_version') === 10) {
+  if (liveVersion.call('get_major_version') === 10) {
     var notes = liveTen(clip);
   } else {
     var notes = liveEleven(clip);

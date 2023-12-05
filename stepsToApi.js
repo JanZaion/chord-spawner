@@ -33,15 +33,20 @@ function liveEleven(clip, dict) {
   clip.call('add_new_notes', dict);
 }
 
+var clipToSelect = new LiveAPI();
+
 //returns whats selected
 function clipOrSlot() {
-  var clipToSelect = new LiveAPI('live_set view detail_clip');
+  clipToSelect.path = 'live_set view detail_clip';
   if (clipToSelect) {
     return clipToSelect;
   } else {
-    return new LiveAPI('live_set view highlighted_clip_slot clip');
+    clipToSelect.path = 'live_set view highlighted_clip_slot clip';
+    return clipToSelect;
   }
 }
+
+var liveVersion = new LiveAPI();
 
 //passes notes down to the Live API based on the received name of a dict and active Live version
 function setNotes(dictName) {
@@ -49,9 +54,9 @@ function setNotes(dictName) {
   var dict = getDict(dictName);
 
   clip.set('loop_end', dict.totalDuration);
+  liveVersion.path = 'live_app';
 
-  var live = new LiveAPI('live_app');
-  if (live.call('get_major_version') === 10) {
+  if (liveVersion.call('get_major_version') === 10) {
     liveTen(clip, dict);
   } else {
     liveEleven(clip, dict);
